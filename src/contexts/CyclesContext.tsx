@@ -1,3 +1,4 @@
+import { differenceInSeconds } from "date-fns";
 import { createContext, ReactNode, useEffect, useReducer, useState } from "react";
 import { addNewCycleAction, interruptCurrentCycleAction, markCurrentCycleAsFinishedAction } from "../reducers/cycles/actions";
 import { Cycle, cyclesReducer } from "../reducers/cycles/reducer";
@@ -31,22 +32,38 @@ export function CyclesContextProvider({ children }: CyclesContextProviderProps) 
     activeCycleId: null,
   },
     // Terceiro parâmetro do reducer, recuperar dados iniciais de algum outro lugar
-    // () => {}
-  )
-
-
-  const [amountSecondsPassed, setAmountSecondsPassed] = useState(0)
-
-  // Salvando cycles no localStorage do browser
-  useEffect(() => {
-    const stateJSON = JSON.stringify(cyclesState)
-    localStorage.setItem('@guto-ignite-timer:cycles-state-1.0.0', stateJSON)
-  }, [cyclesState])
+    () => {
+      const storedStateAsJSON = localStorage.getItem(
+        '@guto-ignite-timer:cycles-state-1.0.0',
+      )
+      if (storedStateAsJSON) {
+        return JSON.parse(storedStateAsJSON)
+      }
+    })
 
   // Package reducers
   const { cycles, activeCycleId } = cyclesState
 
   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
+
+
+  const [amountSecondsPassed, setAmountSecondsPassed] = useState(() => {
+    if (activeCycle) {
+      return differenceInSeconds(
+        new Date(),
+        new Date(activeCycle.startDate),
+      )
+    }
+    return 0
+  })
+
+  // Salvando cycles no localStorage do browser
+  useEffect(() => {
+    const stateJSON = JSON.stringify(cyclesState)
+
+    localStorage.setItem('@guto-ignite-timer:cycles-state-1.0.0', stateJSON)
+  }, [cyclesState])
+
 
   function setSecondsPassed(seconds: number) {
     setAmountSecondsPassed(seconds)
