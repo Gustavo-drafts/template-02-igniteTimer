@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useReducer, useState } from "react";
+import { createContext, ReactNode, useEffect, useReducer, useState } from "react";
 import { addNewCycleAction, interruptCurrentCycleAction, markCurrentCycleAsFinishedAction } from "../reducers/cycles/actions";
 import { Cycle, cyclesReducer } from "../reducers/cycles/reducer";
 
@@ -30,10 +30,18 @@ export function CyclesContextProvider({ children }: CyclesContextProviderProps) 
     cycles: [],
     activeCycleId: null,
   },
+    // Terceiro parâmetro do reducer, recuperar dados iniciais de algum outro lugar
+    // () => {}
   )
 
 
   const [amountSecondsPassed, setAmountSecondsPassed] = useState(0)
+
+  // Salvando cycles no localStorage do browser
+  useEffect(() => {
+    const stateJSON = JSON.stringify(cyclesState)
+    localStorage.setItem('@guto-ignite-timer:cycles-state-1.0.0', stateJSON)
+  }, [cyclesState])
 
   // Package reducers
   const { cycles, activeCycleId } = cyclesState
